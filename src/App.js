@@ -1,23 +1,21 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./App.css";
-import socketIOClient from "socket.io-client";
-import { render } from "@testing-library/react";
-const socket = socketIOClient("http://localhost:5000");
+import socket from "./utils/socket";
+import Header from "./components/Header";
+import Rooms from "./components/Rooms";
 const moment = require("moment");
 
-function App() {
-  const [chat, setChat] = useState("");
-  const [name, setName] = useState("");
+export default function App() {
+  const [user, setUser] = useState("Guest");
   const [chatLog, setChatLog] = useState([]);
   const chatLogRef = useRef(chatLog);
 
   function submitChat(e) {
     e.preventDefault();
     const unixTimeStamp = new Date().getTime(); // 1578827266931
-    //moment();
     const chatObj = {
       text: e.target.chat.value,
-      user: name,
+      user: user.name,
       createdAt: unixTimeStamp,
     };
     console.log("chatObj on submit: ", chatObj);
@@ -30,11 +28,17 @@ function App() {
     });
   }
 
-  useEffect(() => {
-    const user = prompt("please enter your name");
-    setName(user);
-    chatConnection();
-  }, []);
+  const askUser = () => {
+    const userName = prompt("Please enter your username");
+    if (!userName) return askUser();
+    socket.emit("login", userName, (res) => {
+      if (!res.ok) {
+        return alert("Cannot login");
+      } else {
+        setUser(res.data);
+      }
+    });
+  };
 
   function chatConnection() {
     socket.on("chatlog", (msg) => {
@@ -47,17 +51,28 @@ function App() {
   }
 
   function renderChatLog() {
-    return chatLog.map((chatObj) => (
-      <p>
-        <strong>{chatObj.name}:</strong>
-        {chatObj.text}
-      </p>
-    ));
+    return chatLog.map((chatObj, index) => {
+      let date = moment(chatObj.createdAt).format("LT");
+      return (
+        <p key={index}>
+          <strong>
+            {chatObj.user}:{` ${date}  `}
+          </strong>
+          {chatObj.text}
+        </p>
+      );
+    });
   }
+
+  useEffect(() => {
+    askUser();
+    chatConnection();
+  }, []);
 
   return (
     <div className="container mt-3">
-      <h1>Hello World</h1>
+      <Header user={user} />
+      <Rooms />
       <div className="chatbox">
         <form onSubmit={(e) => submitChat(e)}>
           <input name="chat" type="text" />
@@ -68,5 +83,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
