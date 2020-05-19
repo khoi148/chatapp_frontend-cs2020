@@ -32,11 +32,9 @@ export default function App() {
     const userName = prompt("Please enter your username");
     if (!userName) return askUser();
     socket.emit("login", userName, (res) => {
-      if (!res.ok) {
-        return alert("Cannot login");
-      } else {
-        setUser(res.data);
-      }
+      if (!res.ok) return alert("Cannot login");
+      console.log("login data", res.data);
+      setUser(res.data);
     });
   };
 
