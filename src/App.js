@@ -10,6 +10,26 @@ export default function App() {
   const [chatLog, setChatLog] = useState([]);
   const chatLogRef = useRef(chatLog);
 
+  const askUser = () => {
+    const userName = prompt("Please enter your username");
+    if (!userName) return askUser();
+    socket.emit("login", userName, (res) => {
+      if (!res.ok) return alert("Cannot login");
+      console.log("login data", res.data);
+      setUser(res.data);
+    });
+    console.log("current default user: ", user);
+  };
+  function chatConnection() {
+    socket.on("chatlog", (chatObj) => {
+      console.log("React chatlog", chatObj);
+      chatLogRef.current.push(chatObj); //chatLogRef.current is actually the current value of chatLog
+      //make sure to create a new object/array, like here. So React Hooks will trigger on the memory address change
+      setChatLog([...chatLogRef.current]);
+    });
+  }
+
+  //chat functions
   function submitChat(e) {
     e.preventDefault();
     const unixTimeStamp = new Date().getTime(); // 1578827266931
@@ -25,23 +45,6 @@ export default function App() {
       } else {
         console.log("message has been sent");
       }
-    });
-  }
-  const askUser = () => {
-    const userName = prompt("Please enter your username");
-    if (!userName) return askUser();
-    socket.emit("login", userName, (res) => {
-      if (!res.ok) return alert("Cannot login");
-      console.log("login data", res.data);
-      setUser(res.data);
-    });
-  };
-  function chatConnection() {
-    socket.on("chatlog", (chatObj) => {
-      console.log("React chatlog", chatObj);
-      chatLogRef.current.push(chatObj); //chatLogRef.current is actually the current value of chatLog
-      //make sure to create a new object/array, like here. So React Hooks will trigger on the memory address change
-      setChatLog([...chatLogRef.current]);
     });
   }
   function renderChatLog() {
@@ -77,17 +80,24 @@ export default function App() {
     });
   }
   return (
-    <div className="container mt-3">
+    <div className="">
       <Header user={user} />
-      <Rooms />
-      <button onClick={() => leaveRoom()}>Leave Room</button>
-      <div className="chatbox">
-        <form onSubmit={(e) => submitChat(e)}>
-          <input name="chat" type="text" />
-          <button type="submit">Chat</button>
-        </form>
+      <div className="row">
+        <div class="col-3 order-1">
+          <Rooms />
+        </div>
+        <div class="col order-2">
+          <h1>Main Area</h1>
+          <button onClick={() => leaveRoom()}>Leave Room</button>
+          <div className="chatbox">
+            <form onSubmit={(e) => submitChat(e)}>
+              <input name="chat" type="text" />
+              <button type="submit">Chat</button>
+            </form>
+          </div>
+          <div className="container">{renderChatLog()}</div>
+        </div>
       </div>
-      <div className="container">{renderChatLog()}</div>
     </div>
   );
 }

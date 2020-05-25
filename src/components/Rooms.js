@@ -17,6 +17,18 @@ export default function Rooms() {
   };
 
   function renderRooms() {
+    if (rooms.length === 0) {
+      setRooms([
+        {
+          _id: Math.random() * Math.random(),
+          name: ("room" + Math.random()).substr(0, 9),
+        },
+        {
+          _id: Math.random() * Math.random(),
+          name: ("room" + Math.random()).substr(0, 9),
+        },
+      ]);
+    }
     return rooms.map((room) => {
       return (
         <span key={room._id} onClick={() => joinRoom(room._id)}>
@@ -26,8 +38,14 @@ export default function Rooms() {
     });
   }
   return (
-    <div className="d-flex justify-content-around">
-      List of Rooms: {renderRooms()}
+    <div>
+      <div
+        className="d-flex flex-column justify-content-around bg-warning p-3"
+        style={{ height: window.innerHeight }}
+      >
+        <span>List of Rooms:</span>
+        {renderRooms()}
+      </div>
     </div>
   );
 }
