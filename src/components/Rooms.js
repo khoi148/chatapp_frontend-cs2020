@@ -10,6 +10,8 @@ export default function Rooms() {
     }); //data should be an array
   }, []);
   const joinRoom = (roomId) => {
+    //check if you're in a room
+    //call socket "leaveRoom if you are already in a room"
     console.log("joining roomId: ", roomId);
     socket.emit("joinRoom", roomId);
   };

@@ -27,7 +27,6 @@ export default function App() {
       }
     });
   }
-
   const askUser = () => {
     const userName = prompt("Please enter your username");
     if (!userName) return askUser();
@@ -37,40 +36,51 @@ export default function App() {
       setUser(res.data);
     });
   };
-
   function chatConnection() {
-    socket.on("chatlog", (msg) => {
-      console.log("React chatlog", msg);
-      //chatLogRef.current is actually the current value of chatLog
-      chatLogRef.current.push(msg);
+    socket.on("chatlog", (chatObj) => {
+      console.log("React chatlog", chatObj);
+      chatLogRef.current.push(chatObj); //chatLogRef.current is actually the current value of chatLog
       //make sure to create a new object/array, like here. So React Hooks will trigger on the memory address change
       setChatLog([...chatLogRef.current]);
     });
   }
-
   function renderChatLog() {
     return chatLog.map((chatObj, index) => {
       let date = moment(chatObj.createdAt).format("LT");
+      let displayName =
+        chatObj.user !== null && chatObj.user !== undefined
+          ? chatObj.user
+          : "System";
       return (
         <p key={index}>
           <strong>
-            {chatObj.user}:{` ${date}  `}
+            {displayName}:{` ${date}  `}
           </strong>
           {chatObj.text}
         </p>
       );
     });
   }
-
   useEffect(() => {
     askUser();
     chatConnection();
   }, []);
 
+  function leaveRoom() {
+    console.log("trying to leave Room...");
+    socket.emit("leaveRoom", null, (res) => {
+      if (res & !res.ok) {
+        console.log("error in leaveRoom(): ", res.error);
+      } else {
+        console.log("User left room.");
+      }
+    });
+  }
   return (
     <div className="container mt-3">
       <Header user={user} />
       <Rooms />
+      <button onClick={() => leaveRoom()}>Leave Room</button>
       <div className="chatbox">
         <form onSubmit={(e) => submitChat(e)}>
           <input name="chat" type="text" />
