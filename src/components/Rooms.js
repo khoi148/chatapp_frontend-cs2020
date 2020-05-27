@@ -3,10 +3,15 @@ import socket from "../utils/socket";
 
 export default function Rooms() {
   const [rooms, setRooms] = useState([]);
-  const [roomInUse, setRoomInUse] = useState(null);
+  const [currentRoom, setCurrentRoom] = useState("none");
+
   useEffect(() => {
     socket.on("rooms", (data) => {
       setRooms(data);
+    }); //data should be an array
+    socket.on("selectedRoom", (room) => {
+      let selectedRoom = room !== null ? room.name : "none";
+      setCurrentRoom(selectedRoom);
     }); //data should be an array
   }, []);
   const joinRoom = (roomId) => {
@@ -37,12 +42,23 @@ export default function Rooms() {
       );
     });
   }
+  function leaveRoom() {
+    socket.emit("leaveRoom", null, (res) => {
+      if (res !== null && res.ok) {
+        console.log("User left room.");
+      } else {
+        console.log("leaveRoom() error: ", res.error);
+      }
+    });
+  }
   return (
     <div>
       <div
-        className="d-flex flex-column justify-content-around bg-warning p-3"
+        className="d-flex flex-column justify-content-around bg-warning"
         style={{ height: window.innerHeight }}
       >
+        <h2>Current Room: {currentRoom}</h2>
+        <button onClick={() => leaveRoom()}>Leave Room</button>
         <span>List of Rooms:</span>
         {renderRooms()}
       </div>

@@ -28,7 +28,6 @@ export default function App() {
       setChatLog([...chatLogRef.current]);
     });
   }
-
   //chat functions
   function submitChat(e) {
     e.preventDefault();
@@ -69,26 +68,15 @@ export default function App() {
     chatConnection();
   }, []);
 
-  function leaveRoom() {
-    console.log("trying to leave Room...");
-    socket.emit("leaveRoom", null, (res) => {
-      if (res & !res.ok) {
-        console.log("error in leaveRoom(): ", res.error);
-      } else {
-        console.log("User left room.");
-      }
-    });
-  }
   return (
     <div className="">
       <Header user={user} />
       <div className="row">
-        <div class="col-3 order-1">
+        <div className="col-3 order-1 p-0">
           <Rooms />
         </div>
-        <div class="col order-2">
+        <div className="col-9 order-2 p-0">
           <h1>Main Area</h1>
-          <button onClick={() => leaveRoom()}>Leave Room</button>
           <div className="chatbox">
             <form onSubmit={(e) => submitChat(e)}>
               <input name="chat" type="text" />
