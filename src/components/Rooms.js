@@ -36,9 +36,13 @@ export default function Rooms() {
     }
     return rooms.map((room) => {
       return (
-        <span key={room._id} onClick={() => joinRoom(room._id)}>
+        <button
+          className="btn btn-primary"
+          key={room._id}
+          onClick={() => joinRoom(room._id)}
+        >
           {room.name + " "}
-        </span>
+        </button>
       );
     });
   }
@@ -54,7 +58,7 @@ export default function Rooms() {
   return (
     <div>
       <div
-        className="d-flex flex-column justify-content-around bg-warning"
+        className="d-flex flex-column bg-warning p-2"
         style={{ height: window.innerHeight }}
       >
         <h2>Current Room: {currentRoom}</h2>
